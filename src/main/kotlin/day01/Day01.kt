@@ -16,8 +16,10 @@ fun processDirections(moves: List<String>, trackCollisions: Boolean = false): Po
         position = result.point
         visited.addAll(result.visitedPoints)
 
-        if (trackCollisions && result.previouslyVisited.isPresent) {
-            return result.previouslyVisited.get()
+        if (trackCollisions) {
+            result.previouslyVisited?.let { it2 ->
+                return it2
+            }
         }
     }
 

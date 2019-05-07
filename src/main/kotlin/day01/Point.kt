@@ -1,8 +1,6 @@
 package day01
 
-import java.util.Optional
-
-data class MoveResult(val point: Point, val visitedPoints: Set<Point>, val previouslyVisited: Optional<Point>)
+data class MoveResult(val point: Point, val visitedPoints: Set<Point>, val previouslyVisited: Point?)
 
 data class Point(val x: Int = 0, val y: Int = 0) {
     fun move(direction: Direction,
@@ -31,6 +29,6 @@ data class Point(val x: Int = 0, val y: Int = 0) {
             lastPoint = point
         }
 
-        return MoveResult(lastPoint, justVisited, Optional.ofNullable(previouslyVisited))
+        return MoveResult(lastPoint, justVisited, previouslyVisited)
     }
 }
