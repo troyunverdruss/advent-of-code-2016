@@ -17,4 +17,17 @@ class Day02Test {
         assertEquals(result, "1985")
     }
 
+    @Test
+    fun testExamplePart2() {
+        val lines = mutableListOf(
+                "ULL",
+                "RRDDD",
+                "LURDL",
+                "UUUUD"
+        )
+
+        val result = processLines(lines, layoutId = 2)
+        assertEquals(result, "5DB3")
+    }
+
 }
