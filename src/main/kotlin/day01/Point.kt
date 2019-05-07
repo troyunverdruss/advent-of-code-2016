@@ -20,7 +20,7 @@ data class Point(val x: Int = 0, val y: Int = 0) {
                 Direction.EAST -> Point(lastPoint.x + 1, lastPoint.y)
             }
 
-            if (trackCollisions && visited.contains(point)) {
+            if (trackCollisions && point in visited) {
                 println("Collided at $point")
                 previouslyVisited = point
             }
