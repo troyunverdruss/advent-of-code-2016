@@ -17,5 +17,8 @@ lines.forEach {
 
 val finalPosition = processDirections(moves)
 val distance = manhattanDistance(Point(), finalPosition)
-
 println("Part 1, distance to intersection: $distance")
+
+val finalPosition2 = processDirections(moves, true)
+val distance2 = manhattanDistance(Point(), finalPosition2)
+println("Part 2, distance to first collision: $distance2")
