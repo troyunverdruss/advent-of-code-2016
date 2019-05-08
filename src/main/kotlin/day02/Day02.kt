@@ -5,7 +5,7 @@ import java.lang.IllegalArgumentException
 
 data class DirectionMapping(val up: String?, val down: String?, val left: String?, val right: String?)
 
-class Key(val mapping: DirectionMapping, val value: String) {
+class Key(private val mapping: DirectionMapping, private val value: String) {
     fun move(direction: Direction): String {
         return when (direction) {
             Direction.UP -> mapping.up ?: value
