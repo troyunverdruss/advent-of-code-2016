@@ -18,6 +18,34 @@ data class Room(val name: String, val sectorId: Int, val checksum: String) {
     }
 }
 
+class Shifter(rot: Int = 0) {
+    private val letterMap: Map<Char, Char>
+
+    init {
+        val letterOrder = "abcdefghijklmnopqrstuvwxyz"
+        val initLetterMap = mutableMapOf<Char, Char>()
+
+        for (i in letterOrder.indices) {
+            initLetterMap[letterOrder[i]] = letterOrder[(i + rot) % letterOrder.length]
+        }
+
+        letterMap = initLetterMap
+    }
+
+    fun shift(input: String): String {
+        val sb = StringBuilder(input.length)
+        for (c in input) {
+            if (c in letterMap) {
+                sb.append(letterMap[c])
+            } else {
+                sb.append(" ")
+            }
+        }
+        return sb.toString()
+    }
+}
+
+
 fun parseRoomString(input: String): Room {
     val matchResult = Regex("(.*-)(\\d+)\\[(.*)]").matchEntire(input)
 
@@ -38,6 +66,21 @@ fun sumValidRoomSectorIds(rooms: List<Room>): Int {
     return sum
 }
 
+fun findNorthPoleStorage(rooms: List<Room>): Int {
+    rooms.forEach { room ->
+        if (room.isReal()) {
+            val shifter = Shifter(room.sectorId)
+            val decoded = shifter.shift(room.name)
+
+            if ("north" in decoded && "pole" in decoded && "storage " in decoded) {
+                return room.sectorId
+            }
+        }
+    }
+
+    throw IllegalStateException("Could not find north pole storage")
+}
+
 fun main() {
     val rooms = mutableListOf<Room>()
     File(ClassLoader.getSystemResource("input_d4.txt").file).forEachLine {
@@ -46,4 +89,7 @@ fun main() {
 
     val count = sumValidRoomSectorIds(rooms)
     println("Part 1, sum of valid rooms' sector IDs: $count")
+
+    val id = findNorthPoleStorage(rooms)
+    println("Part 2, room with north pole storage: $id")
 }
