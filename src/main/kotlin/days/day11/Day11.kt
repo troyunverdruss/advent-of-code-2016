@@ -1,6 +1,6 @@
 package days.day11
 
-import java.util.concurrent.TimeUnit
+import java.util.PriorityQueue
 import kotlin.system.measureTimeMillis
 
 
@@ -27,6 +27,15 @@ data class Microchip(override val id: String) : Component {
 data class State(val elevatorFloor: Int,
                  val floors: List<Set<Component>>) {
 
+    fun estimatedDistanceToCompletion(): Int {
+        val max = floors.lastIndex
+        var sum = 0
+        floors.forEachIndexed { index, floor ->
+            sum += (max - index) * floor.size
+        }
+        return sum
+    }
+
     fun isValid(): Boolean {
         val floorChecks = mutableListOf<Boolean>()
         for (floor in floors) {
@@ -46,6 +55,33 @@ data class State(val elevatorFloor: Int,
         // If any of the floors are not valid (false) then the data is totally invalid
         return floorChecks.all { it }
     }
+
+    fun hashableDetails(): List<Int> {
+        val details = mutableListOf<Int>()
+
+        for (floor in floors) {
+            var pairCount = 0
+
+            val microchips = floor.filter { it.type == ComponentType.MICROCHIP }
+            val generators = floor.filter { it.type == ComponentType.GENERATOR }
+
+            // Removing all the microchips that are safe because they're with their own generators
+            generators.forEach { generator ->
+                microchips.forEach { microchip ->
+                    if (microchip.id == generator.id) {
+                        pairCount += 1
+                    }
+                }
+            }
+
+            details.add(pairCount)
+            details.add(microchips.size - pairCount)
+            details.add(generators.size - pairCount)
+        }
+
+        return details
+    }
+
 
     fun isEndState(): Boolean {
         return floors[0].isEmpty() && floors[1].isEmpty() && floors[2].isEmpty() && isValid()
@@ -145,78 +181,96 @@ fun getPuzzleInputPart2(inputPart1: State): State {
     )
 }
 
+data class SearchNode(val g: Int, val h: Int, val state: State) {
+    private val details = state.hashableDetails()
+
+    fun f(): Int {
+        return g + h
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SearchNode
+
+        if (g != other.g) return false
+        if (h != other.h) return false
+        if (details != other.details) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = g
+        result = 31 * result + h
+        result = 31 * result + details.hashCode()
+        return result
+    }
+}
+
 fun run(initialState: State): Int {
-//    val queue = LinkedList<State>()
-    val queue = LinkedHashSet<State>()
+    val open = PriorityQueue<SearchNode>(compareBy { node -> node.f() })
+    val inOpen = mutableMapOf<Int, Int>() // SearchNode.hashCode -> f
+    val closed = mutableMapOf<Int, Int>() // SearchNode.hashCode -> f
 
-    queue.add(initialState)
+    val initialSearchNode = SearchNode(0, 0, initialState)
+    open.add(initialSearchNode)
+    inOpen[initialSearchNode.hashCode()] = initialSearchNode.f()
 
-    var seekingSolution = true
-    var solutionNode: State? = null
-    val seen = mutableSetOf<Int>()
-    seen.add(queue.first().hashCode())
+    while (!open.isEmpty()) {
+//        println("open: ${open.size}, ${inOpen.size}, closed: ${closed.size}")
 
-    var level = 0
-    val seenLastLevel = mutableSetOf<Int>()
+        val q = open.poll()
+        inOpen.remove(q.hashCode())
 
-    while (seekingSolution) {
-        level += 1
-        print(level)
-        val seenThisLevel = mutableSetOf<Int>()
+        val possibleNextStates = q.state.nextStates()
 
-        val elapsedMillis = measureTimeMillis {
-            for (i in 0 until queue.size) {
-                val parentState = queue.first()
-                queue.remove(parentState)
+        for (possibleNextState in possibleNextStates) {
+            // We've hit the end, return immediately
+            if (possibleNextState.isEndState()) {
+                return q.g + 1
+            }
 
-                val possibleNextStates = parentState.nextStates()
-                val validStates = possibleNextStates.filter { it.isValid() }
+            if (possibleNextState.isValid()) {
+                val g = q.g + 1
+                val h = possibleNextState.estimatedDistanceToCompletion()
+                val searchNode = SearchNode(g, h, possibleNextState)
 
-                if (validStates.isEmpty()) {
-//                parentState.parent?.children?.remove(parentState)
+                if (inOpen.containsKey(searchNode.hashCode()) && inOpen[searchNode.hashCode()]!! < searchNode.f()) {
                     continue
                 }
 
-                for (possibleNextState in validStates) {
-//                val possibleChildNode = Node(possibleNextState, parentState)
+                if (closed.containsKey(searchNode.hashCode()) && closed[searchNode.hashCode()]!! < searchNode.f()) {
+                    continue
+                }
 
-//                if (possibleNextState.isValid()) { // && !seen.contains(possibleChildNode.hashCode())) {
-                    if (!seen.contains(possibleNextState.hashCode())) {
-                        queue.add(possibleNextState)
-                        seenThisLevel.add(possibleNextState.hashCode())
-
-                        if (possibleNextState.isEndState()) {
-//                        solutionNode = possibleNextState
-                            seekingSolution = false
-                            break
-                        }
-                    }
-//                }
+                if (!inOpen.containsKey(searchNode.hashCode())) {
+                    open.add(searchNode)
+                    inOpen[searchNode.hashCode()] = searchNode.f()
                 }
             }
         }
 
-//        seen.addAll(seenThisLevel.map { it.hashCode() })
-
-        // Pruning all the objects above the current level ...
-//        seenThisLevel.forEach { node -> node.parent = null }
-//        seenLastLevel.clear()
-//        seenLastLevel.addAll(seenThisLevel)
-//        seen.addAll(seenThisLevel)
-        println(": ${seenThisLevel.size} (${elapsedMillis}ms)")
-        seenThisLevel.clear()
+        closed[q.hashCode()] = q.f()
     }
 
-    return level
+    throw RuntimeException("Could not find a solution")
 }
 
 fun main() {
     val inputPart1 = getPuzzleInputPart1()
-    val result = run(inputPart1)
-    println("Part 1, steps: $result")
 
-//    val inputPart2 = getPuzzleInputPart2(inputPart1)
-//    val result2 = run(inputPart2)
-//    println("Part 2: steps: $result2")
+    val time1 = measureTimeMillis {
+        val result1 = run(inputPart1)
+        print("Part 1, steps: $result1")
+    }
+    println(" (${time1}ms)")
 
+    val inputPart2 = getPuzzleInputPart2(inputPart1)
+    val time2 = measureTimeMillis {
+        val result2 = run(inputPart2)
+        print("Part 2: steps: $result2")
+    }
+    println(" (${time2}ms)")
 }
