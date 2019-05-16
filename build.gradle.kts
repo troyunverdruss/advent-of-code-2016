@@ -7,6 +7,7 @@ plugins {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("script-runtime"))
+    implementation("org.jgrapht", "jgrapht-core", "1.3.0")
     testImplementation(kotlin("test-testng"))
 }
 
