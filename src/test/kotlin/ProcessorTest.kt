@@ -1,5 +1,3 @@
-package days.day12
-
 import org.testng.Assert.*
 import org.testng.annotations.Test
 
@@ -35,17 +33,19 @@ class ProcessorTest {
     }
 
     @Test
-    fun `test jump backward`() {
+    fun `test puzzle 23 example input`() {
         val input = """
+            cpy 2 a
+            tgl a
+            tgl a
+            tgl a
             cpy 1 a
-            inc a
-            jnz a -1
-
+            dec a
+            dec a
         """.trimIndent()
 
         val processor = Processor(input.lines())
         processor.run()
-        assertEquals(processor.registers["a"], 0)
+        assertEquals(processor.registers["a"], 3)
     }
-
 }

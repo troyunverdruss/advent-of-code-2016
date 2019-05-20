@@ -1,0 +1,48 @@
+# Setup
+# results in either:
+# a: 0, b: 6: c: 6 d: 7
+# a: 0, b: 11: c: 11 d: 12
+
+cpy a b
+dec b
+    # This loop will keep happening until c is 16 at the end of the whole loop
+    cpy a d
+    cpy 0 a
+
+        # Increment a until d is down to 0
+        cpy b c
+
+        # Now let's start counting ...
+            # Loop until c is down to 0
+            # increment a each time
+            inc a
+            dec c
+            jnz c -2
+        dec d
+        jnz d -5
+    # I think all of the above is multiplying c * d => a
+
+    # Now we're going to double the value in b, but actually do it in c
+    # Decrease b, then copy it to c & d
+    dec b
+    cpy b c
+    cpy c d
+        # Now we're in a loop, increasing value in c, so c*2 => c and d == 0
+        dec d
+        inc c
+        jnz d -2
+
+    # first time through, this toggle does nothing ...
+    tgl c
+
+    cpy -16 c
+    jnz 1 c
+cpy 85 c
+
+# This jump does not happen, since d == 0
+jnz 76 d
+inc a
+inc d
+jnz d -2
+inc c
+jnz c -5
