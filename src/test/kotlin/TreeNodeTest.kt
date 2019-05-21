@@ -1,15 +1,14 @@
-package days.day11
-
+import TreeNode
 import org.testng.Assert.*
 import org.testng.annotations.Test
 
-class NodeTest {
+class TreeNodeTest {
     @Test
     fun `create simple tree and test basic ops`() {
-        val root = Node<String>("root", null)
-        val a = Node("a", root)
-        val b = Node("b", root)
-        val c = Node("c", b)
+        val root = TreeNode<String>("root", null)
+        val a = TreeNode("a", root)
+        val b = TreeNode("b", root)
+        val c = TreeNode("c", b)
 
         assertNull(root.parent)
         assertEquals(a.parent, root)
@@ -31,7 +30,7 @@ class NodeTest {
         assertEquals(a.siblings(), setOf(b))
 
         assertEquals(root.descendants(), setOf(a, b, c))
-        assertEquals(a.descendants(), setOf<Node<String>>())
+        assertEquals(a.descendants(), setOf<TreeNode<String>>())
         assertEquals(b.descendants(), setOf(c))
 
         assertEquals(a.ancestors(), setOf(root))
