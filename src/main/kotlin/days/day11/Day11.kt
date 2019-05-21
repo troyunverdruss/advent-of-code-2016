@@ -128,36 +128,6 @@ fun <T> combinationsOf2(input: Collection<T>): Set<Set<T>> {
     return results
 }
 
-data class Node<T>(val data: T, var parent: Node<T>?) {
-    val children: MutableSet<Node<T>> = mutableSetOf()
-    val depth: Int = parent?.depth?.plus(1) ?: 0
-
-    init {
-        parent?.let {
-            parent!!.children.add(this)
-        }
-    }
-
-    fun root(): Node<T> {
-        return parent?.root() ?: this
-    }
-
-    fun ancestors(): Set<Node<T>> {
-        parent?.let {
-            return parent!!.ancestors().plus(this.parent!!)
-        }
-        return setOf()
-    }
-
-    fun descendants(): Set<Node<T>> {
-        return children.plus(children.flatMap { it.descendants() })
-    }
-
-    fun siblings(): Set<Node<T>> {
-        return parent?.children?.minus(this) ?: setOf()
-    }
-}
-
 fun getPuzzleInputPart1(): State {
     return State(0,
             listOf(

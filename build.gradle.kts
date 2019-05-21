@@ -8,6 +8,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("script-runtime"))
     implementation("org.jgrapht", "jgrapht-core", "1.3.0")
+    implementation("com.google.guava", "guava", "27.1-jre")
     testImplementation(kotlin("test-testng"))
 }
 
