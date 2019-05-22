@@ -40,7 +40,6 @@ fun part1(input: Int, target: Point): Int {
 fun part2(input: Int): Int {
     // Build the graph with some buffer
     val graph = SimpleGraph<Point, DefaultEdge>(DefaultEdge::class.java)
-    val points = mutableMapOf<Point, Type>()
 
     buildGraph(Point(31, 31), input, graph)
 

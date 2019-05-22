@@ -1,7 +1,9 @@
 data class Processor(var instructions: List<String>) {
     private val parsedInstructions = mutableListOf<Instruction>()
-    private var instructionPosition = 0
+    var instructionPosition = 0
     val registers: MutableMap<String, Int> = mutableMapOf<String, Int>().withDefault { 0 }
+    private val output = mutableListOf<Int>()
+    private val registersAtOut = mutableListOf<String>()
     var run = true
     var debug = false
 
@@ -13,7 +15,7 @@ data class Processor(var instructions: List<String>) {
 
     fun run() {
         run = true
-        while (instructionPosition in 0..instructions.lastIndex) {
+        while (instructionPosition in 0..instructions.lastIndex && output.size < 100 && run) {
             if (debug) {
                 print(registers.keys.sorted().map { it to registers[it] }.toList())
                 print("     $instructionPosition: ${parsedInstructions[instructionPosition]}     ")
@@ -24,6 +26,10 @@ data class Processor(var instructions: List<String>) {
             }
 
             instructionPosition += 1
+        }
+
+        if (output.isNotEmpty()) {
+            println(output)
         }
     }
 
@@ -73,6 +79,18 @@ data class Processor(var instructions: List<String>) {
                     if (debug) print("Toggle target outside of instruction set: $positionToModify     ")
                 }
             }
+            Command.OUT -> {
+                registersAtOut.add(registers.keys.sorted().map { it to registers[it] }.toList().toString())
+                output.add(getValue(instruction.arg1))
+                if (registers["a"] == 0) {
+                    run = false
+                }
+            }
+            Command.MUL -> {
+                if (isRegister(instruction.arg1)) {
+                    registers[instruction.arg1] = registers[instruction.arg1]!!.times(getValue(instruction.arg2!!))
+                }
+            }
         }
     }
 
@@ -115,7 +133,7 @@ data class Instruction(val command: Command, val arg1: String, val arg2: String?
 }
 
 enum class Command {
-    CPY, INC, DEC, JNZ, TGL;
+    CPY, INC, DEC, JNZ, TGL, OUT, MUL;
 
     companion object {
         fun from(command: String): Command {
