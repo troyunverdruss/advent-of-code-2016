@@ -52,7 +52,7 @@ fun getHash(input: String, i: Int) = (input + i).md5()
 
 fun getPart2Hash(input: String, i: Int): String {
     var hash = getHash(input, i)
-    for (i in 0 until 2016) {
+    for (ignored in 0 until 2016) {
         hash = hash.md5()
     }
     return hash

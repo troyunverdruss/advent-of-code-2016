@@ -23,8 +23,6 @@ class AStarSearchQueue<T>(private val estimateDistanceFunction: KFunction1<T, In
             open.add(node)
             fLookup[node.hashCode()] = StepsAndEstimatePair(steps, estimateDistanceFunction(node))
         }
-
-        val blah = StepsAndEstimatePair(1, 2)
     }
 
     fun isNotEmpty(): Boolean {
